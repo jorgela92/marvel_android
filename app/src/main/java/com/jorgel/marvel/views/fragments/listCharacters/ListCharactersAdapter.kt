@@ -43,7 +43,6 @@ class ListCharactersAdapter(private val context: Context, private var data: Data
             if (isPagination() && position == data.results.size) {
                 itemView.cellBodyListsDetail.visibility = View.GONE
                 itemView.loadingCell.visibility = View.VISIBLE
-                clickListener.onLoadData()
             } else {
                 itemView.cellBodyListsDetail.visibility = View.VISIBLE
                 itemView.loadingCell.visibility = View.GONE

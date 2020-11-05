@@ -1,9 +1,9 @@
 package com.jorgel.marvel.views.fragments.listCharacters
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.jorgel.marvel.coreServices.ResultResponse
 import com.jorgel.marvel.coreServices.servicesHandler.CharactersServiceHandler
 import com.jorgel.marvel.models.CharactersModel
 import com.jorgel.marvel.models.ErrorModel
@@ -16,34 +16,37 @@ class ListCharactersViewModel : ViewModel() {
     private val charactersObserver = MutableLiveData<CharactersModel>()
     private val errorObserver = MutableLiveData<ErrorModel>()
 
-    fun getCharacters(owner: LifecycleOwner) {
-        CharactersServiceHandler().getCharacters(owner, searchText, getOffset(), getLimit()).observe(owner, {
-            when(null) {
-                it.error -> {
-                    val data = it.obj as CharactersModel
+    fun getCharacters() {
+        CharactersServiceHandler()
+            .getCharacters(
+                searchText,
+                getOffset(),
+                getLimit(),
+                object : ResultResponse<CharactersModel?> {
+                override fun onSuccess(data: CharactersModel?) {
                     if (isSearch()) {
                         if (null != charactersSearch) {
-                            charactersSearch?.data?.results?.addAll(data.data.results)
-                            charactersSearch?.data?.total = data.data.total
+                            data?.data?.results?.let { charactersSearch?.data?.results?.addAll(it) }
+                            charactersSearch?.data?.total = data?.data?.total!!
                             charactersSearch?.data?.count = data.data.count
                         } else {
                             charactersSearch = data
                         }
-                        charactersSearch?.data?.offset = data.data.offset + data.data.limit
+                        charactersSearch?.data?.offset = data?.data?.offset!! + data.data.limit
                         charactersObserver.value = charactersSearch
                     } else {
                         if (null != characters) {
-                            characters?.data?.results?.addAll(data.data.results)
-                            characters?.data?.total = data.data.total
+                            data?.data?.results?.let { characters?.data?.results?.addAll(it) }
+                            characters?.data?.total = data?.data?.total!!
                             characters?.data?.count = data.data.count
                         } else {
                             characters = data
                         }
-                        characters?.data?.offset = data.data.offset + data.data.limit
+                        characters?.data?.offset = data?.data?.offset!! + data.data.limit
                         charactersObserver.value = characters
                     }
                 }
-                it.obj -> {
+                override fun onError(description: ErrorModel?) {
                     if (isSearch()) {
                         if (null != charactersSearch) {
                             charactersSearch?.data?.total = charactersSearch?.data?.results?.size!!
@@ -55,10 +58,9 @@ class ListCharactersViewModel : ViewModel() {
                             characters?.data?.count = characters?.data?.results?.size!!
                         }
                     }
-                    errorObserver.value = it.error
+                    errorObserver.value = description
                 }
-            }
-        })
+            })
     }
 
     fun getObserverCharacters(): LiveData<CharactersModel> {

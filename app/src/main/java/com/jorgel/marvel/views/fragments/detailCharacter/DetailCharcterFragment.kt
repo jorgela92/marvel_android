@@ -48,7 +48,7 @@ class DetailCharacterFragment: Fragment(), DetailCharacterAdapterCallback, Custo
 
     private fun configureUI() {
         viewModel = ViewModelProvider(this).get(DetailCharacterViewModel::class.java)
-        arguments?.getInt(characterSelectedId)?.let { viewModel.getDetailData(this, it) }
+        arguments?.getInt(characterSelectedId)?.let { viewModel.getDetailData(it) }
         detailCharacterRecyclerView.layoutManager = LinearLayoutManager(context)
         viewModel.getCharacterDetail().observe(this, {
             detailCharacterRecyclerView.adapter = context?.let { context -> DetailCharacterAdapter(context, it.data, this) }

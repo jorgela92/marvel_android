@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.jorgel.marvel.R
 import com.jorgel.marvel.views.activities.CharacterClickCallbacks
 import com.jorgel.marvel.views.genericViews.CustomAlertView
@@ -14,9 +15,9 @@ import com.jorgel.marvel.views.genericViews.CustomLoading
 import com.jorgel.marvel.views.genericViews.CustomSearchAlertView
 import kotlinx.android.synthetic.main.list_characters_fragment.*
 
+
 interface ListCharactersCallbacks {
     fun onCharacterSelectedClick(title: String, characterSelected: Int)
-    fun onLoadData()
 }
 
 class ListCharactersFragment(private var clickListener: CharacterClickCallbacks): Fragment(), ListCharactersCallbacks, CustomAlertView.CustomDialogCallback, CustomSearchAlertView.CustomDialogCallback {
@@ -37,18 +38,27 @@ class ListCharactersFragment(private var clickListener: CharacterClickCallbacks)
         super.onActivityCreated(savedInstanceState)
         CustomLoading.getInstance(activity).show()
         viewModel = ViewModelProvider(this).get(ListCharactersViewModel::class.java)
-        viewModel.getCharacters(this)
+        viewModel.getCharacters()
         configureUI()
     }
 
     private fun configureUI() {
         listCharactersRecyclerView.layoutManager = LinearLayoutManager(context)
+        listCharactersRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!recyclerView.canScrollVertically(1)) {
+                    viewModel.getCharacters()
+                }
+            }
+        })
         configureSearch()
         viewModel.getObserverCharacters().observe(this, {
             if (listCharactersRecyclerView.adapter == null) {
                 CustomLoading.getInstance(activity).hide()
                 listCharactersRecyclerView.adapter = context?.let { context -> ListCharactersAdapter(context, it.data, this) }
             } else {
+                CustomLoading.getInstance(activity).hide()
                 (listCharactersRecyclerView.adapter as ListCharactersAdapter).loadMoreData(it.data)
             }
         })
@@ -84,10 +94,6 @@ class ListCharactersFragment(private var clickListener: CharacterClickCallbacks)
         clickListener.onCharacterSelectedClick(title, characterSelected)
     }
 
-    override fun onLoadData() {
-        viewModel.getCharacters(this)
-    }
-
     override fun onClickLeftButton(tag: Int) {}
 
     override fun onClickRightButton(tag: Int) {
@@ -101,10 +107,11 @@ class ListCharactersFragment(private var clickListener: CharacterClickCallbacks)
     }
 
     override fun onClickSearchButton(stringSearch: String?) {
-        viewModel.searchText = stringSearch
-        configureSearch()
-        viewModel.getCharacters(this)
         searchView?.hide()
         searchView = null
+        viewModel.searchText = stringSearch
+        configureSearch()
+        CustomLoading.getInstance(activity).show()
+        viewModel.getCharacters()
     }
 }
