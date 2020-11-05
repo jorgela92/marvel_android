@@ -1,7 +1,6 @@
 package com.jorgel.marvel.views.fragments.detailCharacter.adapters
 
 import android.content.Context
-import android.icu.text.CaseMap
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +13,7 @@ import kotlinx.android.synthetic.main.cell_header.view.*
 import kotlinx.android.synthetic.main.cell_header.view.imageCellHeader
 import kotlinx.android.synthetic.main.cell_list_detail.view.*
 import kotlinx.android.synthetic.main.cell_list_detail.view.cellBodyListsDetail
+import kotlinx.android.synthetic.main.cell_list_detail.view.cellHeaderListDetail
 
 interface DetailCharacterAdapterCallback {
     fun openLink(title: String ,url: String)
@@ -80,7 +80,7 @@ class DetailCharacterAdapter(private val context: Context, private val data: Dat
             itemView.titleListDetail.text = context.getText(R.string.comics)
             itemView.recyclerListDetail.layoutManager = LinearLayoutManager(context)
             itemView.recyclerListDetail.adapter = ListItemsDetailAdapter(context, item.items)
-            itemView.imageCellHeader.setOnClickListener {
+            itemView.cellHeaderListDetail.setOnClickListener {
                 if (item.items.isEmpty()) {
                     return@setOnClickListener
                 }
@@ -100,7 +100,7 @@ class DetailCharacterAdapter(private val context: Context, private val data: Dat
             itemView.titleListDetail.text = context.getText(R.string.series)
             itemView.recyclerListDetail.layoutManager = LinearLayoutManager(context)
             itemView.recyclerListDetail.adapter = ListItemsDetailAdapter(context, item.items)
-            itemView.imageCellHeader.setOnClickListener {
+            itemView.cellHeaderListDetail.setOnClickListener {
                 if (item.items.isEmpty()) {
                     return@setOnClickListener
                 }
@@ -120,7 +120,7 @@ class DetailCharacterAdapter(private val context: Context, private val data: Dat
             itemView.titleListDetail.text = context.getText(R.string.stories)
             itemView.recyclerListDetail.layoutManager = LinearLayoutManager(context)
             itemView.recyclerListDetail.adapter = ListItemsDetailAdapter(context, item.items)
-            itemView.imageCellHeader.setOnClickListener {
+            itemView.cellHeaderListDetail.setOnClickListener {
                 if (item.items.isEmpty()) {
                     return@setOnClickListener
                 }
@@ -140,7 +140,7 @@ class DetailCharacterAdapter(private val context: Context, private val data: Dat
             itemView.titleListDetail.text = context.getText(R.string.events)
             itemView.recyclerListDetail.layoutManager = LinearLayoutManager(context)
             itemView.recyclerListDetail.adapter = ListItemsDetailAdapter(context, item.items)
-            itemView.imageCellHeader.setOnClickListener {
+            itemView.cellHeaderListDetail.setOnClickListener {
                 if (item.items.isEmpty()) {
                     return@setOnClickListener
                 }

@@ -3,6 +3,7 @@ package com.jorgel.marvel.views.activities
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.AppBarLayout
 import com.jorgel.marvel.R
 import com.jorgel.marvel.views.fragments.detailCharacter.DetailCharacterFragment
@@ -11,6 +12,9 @@ import com.jorgel.marvel.views.fragments.listCharacters.ListCharactersFragment
 import com.jorgel.marvel.views.fragments.webView.WebViewFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
+enum class TypeFragment {
+    LIST_CHARACTER, DETAIL_CHARACTERS
+}
 
 interface CharacterClickCallbacks {
     fun onCharacterSelectedClick(title: String, characterSelected: Int)
@@ -18,8 +22,8 @@ interface CharacterClickCallbacks {
 
 class MainActivity : AppCompatActivity(), CharacterClickCallbacks, DetailCharacterFragmentCallback {
 
+    private val listTypeFragment: MutableMap<TypeFragment, Fragment> = mutableMapOf()
     private var title: String = ""
-    private var characterSelected = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,28 +37,34 @@ class MainActivity : AppCompatActivity(), CharacterClickCallbacks, DetailCharact
     }
 
     private fun loadListCharactersFragment() {
+        if (!listTypeFragment.containsKey(TypeFragment.LIST_CHARACTER)) {
+            listTypeFragment[TypeFragment.LIST_CHARACTER] = ListCharactersFragment.newInstance(this)
+        }
         supportFragmentManager.beginTransaction()
-            .replace(R.id.container, ListCharactersFragment.newInstance(this))
-            .commitNow()
-            imageToolbar.visibility = View.VISIBLE
-            titleToolbar.visibility = View.GONE
-            val params: AppBarLayout.LayoutParams = mainToolbar.layoutParams as AppBarLayout.LayoutParams
-            params.scrollFlags = 0
-            mainToolbar.layoutParams = params
-            supportActionBar?.setDisplayHomeAsUpEnabled(false)
-            supportActionBar?.setDisplayShowHomeEnabled(false)
+                .replace(R.id.container, listTypeFragment[TypeFragment.LIST_CHARACTER]!!)
+                .commitNow()
+        imageToolbar.visibility = View.VISIBLE
+        titleToolbar.visibility = View.GONE
+        val params: AppBarLayout.LayoutParams = mainToolbar.layoutParams as AppBarLayout.LayoutParams
+        params.scrollFlags = 0
+        mainToolbar.layoutParams = params
+        mainToolbar.title = ""
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        supportActionBar?.setDisplayShowHomeEnabled(false)
     }
 
-    private fun loadDetailCharacterFragment(title: String, characterSelected: Int) {
+    private fun loadDetailCharacterFragment(title: String, characterSelected: Int? = null) {
+        if (!listTypeFragment.containsKey(TypeFragment.DETAIL_CHARACTERS)) {
+            listTypeFragment[TypeFragment.DETAIL_CHARACTERS] = DetailCharacterFragment.newInstance(characterSelected!!, this)
+        }
         this.title = title
-        this.characterSelected = characterSelected
         supportFragmentManager.beginTransaction()
-            .replace(R.id.container, DetailCharacterFragment.newInstance(characterSelected, this))
+            .replace(R.id.container, listTypeFragment[TypeFragment.DETAIL_CHARACTERS]!!)
             .commitNow()
         configureToolbarTitle(title)
         mainToolbar.setNavigationOnClickListener {
             this.title = ""
-            this.characterSelected = 0
+            listTypeFragment.remove(TypeFragment.DETAIL_CHARACTERS)
             loadListCharactersFragment()
         }
     }
@@ -63,7 +73,7 @@ class MainActivity : AppCompatActivity(), CharacterClickCallbacks, DetailCharact
         supportFragmentManager.beginTransaction()
             .replace(R.id.container, WebViewFragment.newInstance(url))
             .commitNow()
-        mainToolbar.setNavigationOnClickListener { loadDetailCharacterFragment(this.title, this.characterSelected) }
+        mainToolbar.setNavigationOnClickListener { loadDetailCharacterFragment(this.title) }
         configureToolbarTitle(title)
     }
 
@@ -74,6 +84,7 @@ class MainActivity : AppCompatActivity(), CharacterClickCallbacks, DetailCharact
             val params: AppBarLayout.LayoutParams = mainToolbar.layoutParams as AppBarLayout.LayoutParams
             params.scrollFlags = 0
             mainToolbar.layoutParams = params
+            mainToolbar.title = ""
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
             supportActionBar?.setDisplayShowHomeEnabled(true)
     }
