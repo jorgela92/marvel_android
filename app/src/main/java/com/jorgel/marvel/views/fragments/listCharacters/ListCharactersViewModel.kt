@@ -75,6 +75,14 @@ class ListCharactersViewModel : ViewModel() {
         return searchText != null && "" != searchText
     }
 
+    fun isPagination() : Boolean {
+        return if (isSearch()) {
+            charactersSearch?.data?.results?.size != charactersSearch?.data?.total
+        } else {
+            characters?.data?.results?.size != characters?.data?.total
+        }
+    }
+
     fun clearSearch() {
         searchText = null
         charactersSearch = null
