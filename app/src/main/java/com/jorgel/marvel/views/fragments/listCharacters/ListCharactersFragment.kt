@@ -48,7 +48,9 @@ class ListCharactersFragment(private var clickListener: CharacterClickCallbacks)
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (!recyclerView.canScrollVertically(1)) {
-                    viewModel.getCharacters()
+                    if (viewModel.isPagination()) {
+                        viewModel.getCharacters()
+                    }
                 }
             }
         })
